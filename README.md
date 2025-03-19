@@ -21,60 +21,72 @@ npm install @rvanbaalen/readme-to-html
 
 ## Usage
 
-1. **Create a template.html file** in your project's src directory. This file should include placeholder variables that will be replaced with content from your README.md:
+### 1. Create a Template File
 
+Create a `template.html` file in your project's `src` directory with the following placeholders:
+
+| Placeholder | Description |
+|-------------|-------------|
+| `{{PAGE_TITLE}}` | Project name from package.json |
+| `{{PAGE_DESCRIPTION}}` | Project description from package.json |
+| `{{PAGE_PATH}}` | Path for canonical URLs |
+| `{{GITHUB_REPO_LINK}}` | GitHub repository URL |
+| `{{NAVIGATION_LINKS}}` | Auto-generated from README sections |
+| `{{BADGES_SECTION}}` | NPM and GitHub badges | 
+
+For custom stylesheets and section templates, use these special markers:
+
+#### Stylesheet Section
 ```html
-<!-- Required placeholders -->
-{{PAGE_TITLE}} <!-- From package.json name -->
-{{PAGE_DESCRIPTION}} <!-- From package.json description -->
-{{PAGE_PATH}} <!-- For canonical URLs -->
-{{GITHUB_REPO_LINK}} <!-- GitHub repository URL -->
-{{NAVIGATION_LINKS}} <!-- Auto-generated from README sections -->
-{{BADGES_SECTION}} <!-- NPM and GitHub badges -->
+{{[BEGIN-STYLESHEET]}}
+<link href="/css/style.css" rel="stylesheet">
+{{[END-STYLESHEET]}}
+```
 
-<!-- Section template markers -->
+#### Section Template
+```html
 {{[BEGIN-SECTION]}}
-  <!-- Your section template with these placeholders: -->
-  {{SECTION_ID}} <!-- ID attribute for anchor links -->
-  {{SECTION_TITLE}} <!-- Section title (from README h2) -->
-  {{SECTION_CONTENT}} <!-- Content between section headings -->
+<section id="{{SECTION_ID}}">
+  <h2>{{SECTION_TITLE}}</h2>
+  <div>{{SECTION_CONTENT}}</div>
+</section>
 {{[END-SECTION]}}
 ```
 
-2. **Optional: Create a configuration file** to customize paths and behavior:
+### 2. Create a Configuration File (Optional)
+
+Create `rtoh.config.js` in your project root:
 
 ```javascript
-// Create rtoh.config.js in your project root
 export default {
-  // Your configuration options
-  // See Configuration section below
+  // Input files
+  readmePath: "README.md",
+  templatePath: "src/template.html",
+  
+  // Custom stylesheet (local or remote URL)
+  stylesheetPath: "src/custom-styles.css",
+  
+  // Output file
+  outputPath: "index.html",
+  
+  // See Configuration section below for more options
 }
 ```
 
-3. **Run the conversion script**:
+### 3. Run the Conversion Script
 
-```bash
-# Use default configuration
-node index.js
-# or
-npm run render
+| Command | Description |
+|---------|-------------|
+| `npm run render` | Convert README using default settings |
+| `node index.js --config=./path/to/config.js` | Use a custom config file |
+| `npm run watch` | Watch mode - auto-rebuild when files change |
+| `npm run dev` | Start Vite dev server for live preview |
+| `node index.js --help` | Show help information |
+| `node index.js --version` | Show version information |
 
-# Or specify a custom config file
-node index.js --config=./path/to/custom-config.js
-node index.js -c=./path/to/custom-config.js
-# or using npm script
-npm run render -- --config=./path/to/custom-config.js
+### 4. Deploy to GitHub Pages
 
-# Show help information
-node index.js --help
-node index.js -h
-
-# Show version information
-node index.js --version
-node index.js -v
-```
-
-4. **Deploy to GitHub Pages** using your newly generated index.html file.
+Upload your generated `index.html` file and build assets to GitHub Pages.
 
 ## Features
 
@@ -85,7 +97,11 @@ node index.js -v
 - **SEO-Friendly**: Includes meta tags for better search engine visibility
 - **GitHub Integration**: Automatically detects repository information
 - **Customizable**: Complete control over HTML/CSS through template.html
-- **Configurable**: Support for custom configuration via JSON file
+- **Configurable**: Support for custom configuration via JavaScript config file
+- **Remote Templates**: Can fetch template files from URLs (GitHub, CDNs, etc.)
+- **Custom Stylesheets**: Support for local or remote CSS stylesheets
+- **Path Customization**: String replacement to fix paths in remote templates
+- **Live Development**: Watch mode with automatic rebuilds when files change
 
 ## Customization
 
@@ -104,8 +120,18 @@ export default {
   // Output file
   outputPath: "index.html",
   
+  // Custom stylesheet (local path or URL)
+  stylesheetPath: "src/custom-styles.css",
+  // Example of using a remote stylesheet
+  // stylesheetPath: "https://raw.githubusercontent.com/rvanbaalen/readme-to-html/main/src/styles.css",
+  
   // Customization options
   excludeFromNav: ["description", "contributing", "license"],
+  
+  // Template string replacements
+  replace: {
+    "/css/style.css": "./src/style.css" 
+  },
   
   // Marked.js options
   markedOptions: {
@@ -126,9 +152,18 @@ export default {
 **Configuration Options:**
 
 - `readmePath`: Path to your README file (default: `README.md`)
-- `templatePath`: Path to your HTML template (default: `src/template.html`)
+- `templatePath`: Path to your HTML template (default: `src/template.html`). This can be:
+  - A local file path relative to the project root
+  - A URL to fetch the template from (e.g., a GitHub raw URL)
 - `outputPath`: Where to save the generated HTML (default: `index.html`)
+- `stylesheetPath`: Path to a custom CSS stylesheet (default: empty). This can be:
+  - A local file path relative to the project root
+  - A URL to fetch the stylesheet from (e.g., a GitHub raw URL)
+  - An empty string to use default styling
 - `excludeFromNav`: Sections to exclude from navigation bar (default: `["description", "contributing", "license"]`)
+- `replace`: Object with key-value pairs for string replacements in the template (default: `{}`)
+  - Useful for customizing paths in remote templates (e.g., CSS, JavaScript)
+  - Example: `{ "/css/style.css": "./src/style.css" }`
 - `markedOptions`: Options passed to the [marked](https://github.com/markedjs/marked) markdown parser (see [marked documentation](https://marked.js.org/using_advanced#options) for all available options)
 
 ## Development
