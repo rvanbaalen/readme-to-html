@@ -1,6 +1,6 @@
 {
   "name": "@rvanbaalen/readme-to-html",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Transform README.md into a beautiful GitHub Pages site.",
   "main": "index.js",
