@@ -1,41 +1,46 @@
 {
-  "name": "@rvanbaalen/package-name",
+  "name": "@rvanbaalen/readme-to-html",
   "version": "0.0.0",
   "type": "module",
-  "description": "Package description.",
+  "description": "Transform README.md into a beautiful GitHub Pages site.",
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run render && vite build",
     "preview": "vite preview",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "render": "node index.js",
+    "watch": "node index.js --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
     "node": ">=22"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://github.com/rvanbaalen/rvanbaalen/package-name.git"
+    "url": "git+ssh://github.com/rvanbaalen/readme-to-html.git"
   },
   "keywords": [
-    "dom",
     "javascript"
   ],
   "author": "Robin van Baalen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/rvanbaalen/package-name/domjs/issues"
+    "url": "https://github.com/rvanbaalen/readme-to-html/issues"
   },
-  "homepage": "https://robinvanbaalen.nl/package-name",
+  "homepage": "https://robinvanbaalen.nl/readme-to-html",
   "files": [
     "index.js",
     "CHANGELOG.md",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "rtoh.config.example.js"
   ],
   "devDependencies": {
+    "@rvanbaalen/eslint-config": "^1.0.2",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.0.9",
+    "eslint": "^9.22.0",
+    "marked": "^15.0.7",
     "tailwindcss": "^4.0.9",
     "vite": "^6.2.0"
   }
