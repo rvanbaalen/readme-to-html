@@ -4,6 +4,9 @@
   "type": "module",
   "description": "Transform README.md into a beautiful GitHub Pages site.",
   "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "vite",
     "build": "npm run render && vite build",
