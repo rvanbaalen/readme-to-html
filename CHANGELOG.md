@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.0.0...readme-to-html-v1.0.1) (2025-03-19)
+
+
+### Bug Fixes
+
+* add publishConfig to package.json for public access ([0bfb8f8](https://github.com/rvanbaalen/readme-to-html/commit/0bfb8f8910ec269c126d5b29e566f061f200eb12))
+
 ## 1.0.0 (2025-03-19)
 
 
