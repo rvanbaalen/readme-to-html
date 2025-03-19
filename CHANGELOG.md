@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.0.2...readme-to-html-v1.0.3) (2025-03-19)
+
+
+### Bug Fixes
+
+* update installation instructions in README.md for clarity ([c00309d](https://github.com/rvanbaalen/readme-to-html/commit/c00309dbc7695dd937015c3e84287864cd9c14e6))
+
 ## [1.0.2](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.0.1...readme-to-html-v1.0.2) (2025-03-19)
 
 
