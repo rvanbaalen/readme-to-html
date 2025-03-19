@@ -4,8 +4,8 @@
  */
 export default {
   // Use remote template from GitHub repository
-  // templatePath: "https://raw.githubusercontent.com/rvanbaalen/rvanbaalen.github.io/refs/heads/main/templates/project-template.html",
-  templatePath: "~/Sites/rvanbaalen.github.io/templates/project-template.html",
+  templatePath: "https://raw.githubusercontent.com/rvanbaalen/rvanbaalen.github.io/refs/heads/main/templates/project-template.html",
+  // templatePath: "~/Sites/rvanbaalen.github.io/templates/project-template.html",
 
   // Custom stylesheet - using local file
   stylesheetPath: "https://raw.githubusercontent.com/rvanbaalen/rvanbaalen.github.io/refs/heads/main/css/style.css",
