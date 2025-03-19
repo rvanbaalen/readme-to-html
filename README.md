@@ -13,7 +13,7 @@ Perfect for developers who want to create professional project pages without wri
 
 ## Installation
 
-Install the package via npm:
+Install the package with npm:
 
 ```bash
 npm install @rvanbaalen/readme-to-html
