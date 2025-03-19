@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
 
 export default defineConfig({
-  base: "/package-name/", // Change this if your page is not hosted at a root URL
+  base: "/readme-to-html/", // Change this if your page is not hosted at a root URL
   plugins: [
     tailwindcss(),
   ],
