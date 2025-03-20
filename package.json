@@ -4,6 +4,9 @@
   "type": "module",
   "description": "Transform README.md into a beautiful GitHub Pages site.",
   "main": "index.js",
+  "bin": {
+    "readme-to-html": "./index.js"
+  },
   "publishConfig": {
     "access": "public"
   },

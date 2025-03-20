@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import fs from 'fs/promises';
 import { watch, existsSync } from 'fs';
 import path from 'path';
