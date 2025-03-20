@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.1.0...readme-to-html-v1.2.0) (2025-03-20)
+
+
+### Features
+
+* add --install-workflow option to set up manual deployment GitHub Actions workflow ([55232dc](https://github.com/rvanbaalen/readme-to-html/commit/55232dc2c03725385973a87d64520d6a60b83729))
+
 ## [1.1.0](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.0.3...readme-to-html-v1.1.0) (2025-03-20)
 
 
