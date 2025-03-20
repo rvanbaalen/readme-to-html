@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.2.1...readme-to-html-v1.2.2) (2025-03-20)
+
+
+### Bug Fixes
+
+* move 'marked' dependency to dependencies section in package.json ([4f197cf](https://github.com/rvanbaalen/readme-to-html/commit/4f197cf948bc7d330039f2124ac29736b7ec53cf))
+
 ## [1.2.1](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.2.0...readme-to-html-v1.2.1) (2025-03-20)
 
 
