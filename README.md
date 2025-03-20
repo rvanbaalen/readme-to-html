@@ -89,6 +89,7 @@ Run the tool directly using npx (no installation required):
 | `npx @rvanbaalen/readme-to-html --config=./path/to/config.js` | Use a custom config file |
 | `npx @rvanbaalen/readme-to-html --watch` | Watch mode - auto-rebuild when files change |
 | `npx @rvanbaalen/readme-to-html --cleanup` | Remove all generated files |
+| `npx @rvanbaalen/readme-to-html --install-workflow` | Install GitHub Actions workflow for manual deployments |
 | `npx @rvanbaalen/readme-to-html --help` | Show help information |
 | `npx @rvanbaalen/readme-to-html --version` | Show version information |
 
@@ -156,6 +157,23 @@ jobs:
 To use this workflow:
 1. Create `.github/workflows/docs.yml` with the content above
 2. Enable GitHub Pages (Settings > Pages > Source: GitHub Actions)
+
+### Manual Deployment Workflow
+
+You can also install a manual deployment workflow that allows you to trigger builds and deployments on demand without creating a new release:
+
+```bash
+# Install the manual workflow file
+npx @rvanbaalen/readme-to-html --install-workflow
+```
+
+This creates a `.github/workflows/manual-build-deploy.yml` file that you can trigger manually from the GitHub Actions tab. The workflow will:
+
+1. Build your README into HTML
+2. Build the static assets with Vite
+3. Deploy to GitHub Pages
+
+This is useful when you need to redeploy your documentation without pushing new commits.
 
 ## Features
 

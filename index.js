@@ -33,6 +33,7 @@ Options:
   --watch, -w                  Watch mode: automatically rebuild when files change
   --cleanup                    Remove all generated files
   --init                       Create a minimal configuration file (rtoh.config.js)
+  --install-workflow           Install GitHub Actions workflow for manual deployments
   --help, -h                   Show this help information
   --version, -v                Show version information
 
@@ -42,6 +43,7 @@ Examples:
   node index.js --watch
   node index.js --cleanup
   node index.js --init
+  node index.js --install-workflow
   
 For more information, visit: ${packageInfo.homepage || 'https://github.com/rvanbaalen/readme-to-html'}
 `);
@@ -98,6 +100,107 @@ export default {
     console.log('2. Run `npx @rvanbaalen/readme-to-html` to generate your HTML');
   } catch (error) {
     console.error(`Error creating configuration file: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+/**
+ * Install manual deployment GitHub Actions workflow
+ */
+async function installWorkflow() {
+  console.log('🛠️  Installing GitHub Actions workflow for manual deployments...');
+  
+  // Create .github/workflows directory if it doesn't exist
+  const workflowsDir = path.join(process.cwd(), '.github', 'workflows');
+  const workflowPath = path.join(workflowsDir, 'manual-build-deploy.yml');
+  
+  try {
+    // Create the directories if they don't exist
+    await fs.mkdir(workflowsDir, { recursive: true });
+    
+    // Check if the workflow file already exists
+    if (existsSync(workflowPath)) {
+      console.warn(`⚠️  Workflow file already exists at ${workflowPath}`);
+      const overwrite = await promptForOverwrite();
+      
+      if (!overwrite) {
+        console.log('❌ Operation cancelled. Existing workflow file was not modified.');
+        return;
+      }
+    }
+    
+    // Define workflow file content
+    const workflowContent = `name: Manual Build & Deploy
+
+# This workflow allows you to manually build and deploy the project
+# without creating a new release
+
+on:
+  workflow_dispatch:
+    # Optional inputs for the workflow
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'github-pages'
+        type: choice
+        options:
+          - github-pages
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Render README.md to HTML
+        run: node ./index.js
+
+      - name: Build HTML to static files
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+  # Deployment job
+  deploy:
+    environment:
+      name: \${{ inputs.environment }}
+      url: \${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+`;
+    
+    // Write the workflow file
+    await fs.writeFile(workflowPath, workflowContent, 'utf8');
+    console.log(`✅ GitHub Actions workflow created at: ${workflowPath}`);
+    console.log('\nNext steps:');
+    console.log('1. Commit and push the workflow file to your repository');
+    console.log('2. Go to GitHub Actions tab to manually trigger the workflow');
+  } catch (error) {
+    console.error(`Error creating workflow file: ${error.message}`);
     process.exit(1);
   }
 }
@@ -246,6 +349,12 @@ async function loadConfig() {
     // Check for init mode
     if (arg === '--init') {
       await createInitialConfig();
+      process.exit(0);
+    }
+    
+    // Check for install-workflow mode
+    if (arg === '--install-workflow') {
+      await installWorkflow();
       process.exit(0);
     }
   }
