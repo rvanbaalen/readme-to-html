@@ -4,7 +4,9 @@ Transform README.md into a beautiful GitHub Pages site.
 
 ## Description
 
-`readme-to-html` is a Node.js tool that converts your project's README.md file into a polished HTML page, perfect for GitHub Pages. It extracts sections from your README, applies styling through customizable templates, and generates a responsive website that showcases your project.
+`@rvanbaalen/readme-to-html` is a Node.js tool that converts your project's README.md file into a polished HTML page, 
+perfect for GitHub Pages. It extracts sections from your README, applies styling through customizable templates, 
+and generates a responsive website that showcases your project.
 
 ### Features
 
