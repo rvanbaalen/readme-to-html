@@ -1,255 +1,167 @@
-[&larr; See my other Open Source projects](https://robinvanbaalen.nl)
+# readme-to-html
 
-# @rvanbaalen/readme-to-html
-![NPM Downloads](https://img.shields.io/npm/d18m/%40rvanbaalen%2Freadme-to-html)
-![GitHub License](https://img.shields.io/github/license/rvanbaalen/readme-to-html)
-![NPM Version](https://img.shields.io/npm/v/%40rvanbaalen%2Freadme-to-html)
+Transform README.md into a beautiful GitHub Pages site.
 
 ## Description
 
-A powerful utility that transforms your README.md into a beautifully styled GitHub Pages site. This package automatically converts your markdown documentation into a fully functional HTML page with navigation, syntax highlighting, responsive design, and more.
+`readme-to-html` is a Node.js tool that converts your project's README.md file into a polished HTML page, perfect for GitHub Pages. It extracts sections from your README, applies styling through customizable templates, and generates a responsive website that showcases your project.
 
-Perfect for developers who want to create professional project pages without writing HTML/CSS from scratch. Simply customize your template once, and all your projects can have consistent, branded documentation sites.
+### Features
 
-## Quick Start (5-minute setup)
+- 🚀 **Simple Setup**: Convert your README to HTML with a single command
+- 🎨 **Customizable**: Use your own HTML templates and CSS styles
+- 📱 **Responsive**: Generated pages work on all devices
+- 🔄 **Watch Mode**: Automatically rebuild when files change
+- 🌐 **Remote Templates**: Use templates and styles from URLs
+- 🛠️ **GitHub Integration**: Easily deploy to GitHub Pages
 
-This package runs via `npx` without installation, perfect for documentation pipelines:
+## Installation
 
 ```bash
-# 1. Create a config file with pre-made templates
-npx @rvanbaalen/readme-to-html --init
+# Install globally
+npm install -g @rvanbaalen/readme-to-html
 
-# 2. Generate HTML from your README.md
+# Or use with npx
 npx @rvanbaalen/readme-to-html
-
-# 3. Preview the result
-npx vite preview
-
-# 4. For deployment, build assets
-npx vite build
 ```
 
-That's it! Your README.md is now a beautiful documentation site.
+## Usage
 
-For CI/CD integration, see the GitHub Actions workflow example below.
+### Quick Start
 
-## Setup and Configuration
-
-You can either use a pre-made template (recommended for most users) or create your own custom template.
-
-### Using Pre-made Templates (Recommended)
-
-The quickest way to get started is to use the `--init` command to generate a configuration file that uses existing templates:
+The simplest way to use readme-to-html is with the default configuration:
 
 ```bash
-# Generate a config file with pre-made templates
+# In your project directory
+npx @rvanbaalen/readme-to-html
+```
+
+This will:
+1. Read your `README.md` file
+2. Convert it to HTML using the default template
+3. Generate an `index.html` file in your project root
+
+### Configuration
+
+For more control, create a configuration file:
+
+```bash
+# Create a minimal configuration file
 npx @rvanbaalen/readme-to-html --init
 ```
 
-This creates an `rtoh.config.js` file with remote templates and stylesheets already configured.
-
-### Custom Templates (Advanced)
-
-If you need more customization, you can create your own template file with these placeholders:
-
-| Placeholder | Description |
-|-------------|-------------|
-| `{{PAGE_TITLE}}` | Project name from package.json |
-| `{{PAGE_DESCRIPTION}}` | Project description from package.json |
-| `{{PAGE_PATH}}` | Path for canonical URLs |
-| `{{GITHUB_REPO_LINK}}` | GitHub repository URL |
-| `{{NAVIGATION_LINKS}}` | Auto-generated from README sections |
-| `{{BADGES_SECTION}}` | NPM and GitHub badges | 
-
-For custom stylesheets and section templates, use these special markers:
-
-```html
-{{[BEGIN-STYLESHEET]}}
-<link href="/css/style.css" rel="stylesheet">
-{{[END-STYLESHEET]}}
-
-{{[BEGIN-SECTION]}}
-<section id="{{SECTION_ID}}">
-  <h2>{{SECTION_TITLE}}</h2>
-  <div>{{SECTION_CONTENT}}</div>
-</section>
-{{[END-SECTION]}}
-```
-
-> **Note:** If your template doesn't include stylesheet markers, the tool will automatically inject the stylesheet link before the closing `</head>` tag.
-
-## Command Reference
-
-Run the tool directly using npx (no installation required):
-
-| Command | Description |
-|---------|-------------|
-| `npx @rvanbaalen/readme-to-html` | Convert README using default settings |
-| `npx @rvanbaalen/readme-to-html --init` | Create a minimal configuration file |
-| `npx @rvanbaalen/readme-to-html --config=./path/to/config.js` | Use a custom config file |
-| `npx @rvanbaalen/readme-to-html --watch` | Watch mode - auto-rebuild when files change |
-| `npx @rvanbaalen/readme-to-html --cleanup` | Remove all generated files |
-| `npx @rvanbaalen/readme-to-html --install-workflow` | Install GitHub Actions workflow for manual deployments |
-| `npx @rvanbaalen/readme-to-html --help` | Show help information |
-| `npx @rvanbaalen/readme-to-html --version` | Show version information |
-
-### Preview and Testing
-
-After generating the HTML, you can preview it with:
-```bash
-# Preview the generated site
-npx vite preview
-```
-
-### Cleanup
-
-To remove all generated files:
-
-```bash
-# Remove all generated files
-npx @rvanbaalen/readme-to-html --cleanup
-```
-
-This removes the generated HTML file and build directory, respecting custom paths in your configuration.
-
-## CI/CD Integration
-
-Easily automate documentation generation in CI/CD pipelines with GitHub Actions:
-
-```yaml
-on:
-  push:
-    branches:
-      - main
-
-name: Generate and Deploy Documentation
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: 'package.json'
-      - run: npx @rvanbaalen/readme-to-html
-      - run: npx vite build
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: './dist'
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/deploy-pages@v4
-        id: deployment
-```
-
-To use this workflow:
-1. Create `.github/workflows/docs.yml` with the content above
-2. Enable GitHub Pages (Settings > Pages > Source: GitHub Actions)
-
-### Manual Deployment Workflow
-
-You can also install a manual deployment workflow that allows you to trigger builds and deployments on demand without creating a new release:
-
-```bash
-# Install the manual workflow file
-npx @rvanbaalen/readme-to-html --install-workflow
-```
-
-This creates a `.github/workflows/manual-build-deploy.yml` file that you can trigger manually from the GitHub Actions tab. The workflow will:
-
-1. Build your README into HTML
-2. Build the static assets with Vite
-3. Deploy to GitHub Pages
-
-This is useful when you need to redeploy your documentation without pushing new commits.
-
-## Features
-
-- **Automatic Navigation**: Creates a navigation menu from your README.md sections
-- **Section-Based Layout**: Organizes content by README.md headings
-- **Syntax Highlighting**: Includes Prism.js for beautiful code blocks
-- **Responsive Design**: Looks great on all devices
-- **SEO-Friendly**: Includes meta tags for better search engine visibility
-- **GitHub Integration**: Automatically detects repository information
-- **Customizable**: Complete control over HTML/CSS through template.html
-- **Configurable**: Support for custom configuration via JavaScript config file
-- **Remote Templates**: Can fetch template files from URLs (GitHub, CDNs, etc.)
-- **Custom Stylesheets**: Support for local or remote CSS stylesheets
-- **Path Customization**: String replacement to fix paths in remote templates
-- **Live Development**: Watch mode with automatic rebuilds when files change
-- **Easy Cleanup**: Simple command to remove all generated files
-
-## Configuration Options
-
-The configuration file created by `--init` can be customized with these options:
+This creates a `rtoh.config.js` file in your project with these options:
 
 ```javascript
 export default {
-  // Input/Output paths
-  readmePath: "README.md",
-  templatePath: "src/template.html", // Can be local path or remote URL
-  outputPath: "index.html",
+  // Use a remote template (no need to create your own)
+  templatePath: "https://raw.githubusercontent.com/rvanbaalen/rvanbaalen.github.io/refs/heads/main/templates/project-template.html",
   
-  // Styling
-  stylesheetPath: "src/custom-styles.css", // Can be local path or remote URL
+  // Custom stylesheet (optional)
+  stylesheetPath: "https://raw.githubusercontent.com/rvanbaalen/rvanbaalen.github.io/refs/heads/main/templates/style.css",
   
-  // Navigation customization
-  excludeFromNav: ["description", "contributing", "license"],
-  
-  // Path replacements for remote templates
-  replace: {
-    "/css/style.css": "./src/style.css" 
-  },
-  
-  // Markdown parsing options (see marked documentation for all options)
-  markedOptions: {
-    gfm: true,
-    highlight: function(code, lang) {
-      return `<code class="language-${lang}">${code}</code>`;
-    }
-  }
+  // Additional options you can customize:
+  // outputPath: "index.html",
+  // readmePath: "README.md",
+  // excludeFromNav: ["description", "contributing", "license"],
+  // replace: {
+  //   "/css/style.css": "./src/custom.css"
+  // }
 }
 ```
 
-The package uses [marked](https://github.com/markedjs/marked) for markdown parsing and supports TailwindCSS for styling.
+### Command Line Options
 
-## Development Tips
+```
+readme-to-html - Convert README.md to a beautiful HTML page
 
-### Live Preview During Development
-
-For comfortable development with live preview:
-
-```json
-// In package.json
-"scripts": {
-  "docs:render": "npx @rvanbaalen/readme-to-html",
-  "docs:watch": "npx @rvanbaalen/readme-to-html --watch",
-  "docs:preview": "npx vite preview"
-}
+Options:
+  --config=<path>, -c=<path>   Specify a custom configuration file
+  --watch, -w                  Watch mode: automatically rebuild when files change
+  --cleanup                    Remove all generated files
+  --init                       Create a minimal configuration file (rtoh.config.js)
+  --install-workflow           Install GitHub Actions workflow for manual deployments
+  --help, -h                   Show this help information
+  --version, -v                Show version information
 ```
 
-Then run:
+### Watch Mode
+
+For continuous development, use watch mode to automatically rebuild when your README changes:
+
 ```bash
-# Watch for changes with live reload
-npm run docs:watch
+npx @rvanbaalen/readme-to-html --watch
 ```
 
-### Contributing
+### GitHub Pages Integration
 
-Contributions are welcome! Please [open an issue](https://github.com/rvanbaalen/readme-to-html/issues/new) or [submit a pull request](https://github.com/rvanbaalen/readme-to-html/pulls).
+To set up automatic deployments to GitHub Pages:
+
+```bash
+# Install GitHub Actions workflow
+npx @rvanbaalen/readme-to-html --install-workflow
+```
+
+This creates a workflow file that you can trigger manually from the GitHub Actions tab.
+
+## Advanced Configuration
+
+### Template Customization
+
+You can use your own HTML template by setting the `templatePath` in your configuration:
+
+```javascript
+export default {
+  templatePath: "path/to/your/template.html",
+  // ... other options
+}
+```
+
+Templates should include these markers:
+- `{{PAGE_TITLE}}` - Project name from package.json
+- `{{PAGE_DESCRIPTION}}` - Project description from package.json
+- `{{NAVIGATION_LINKS}}` - Auto-generated navigation links
+- `{{BADGES_SECTION}}` - NPM and GitHub badges
+- `{{[BEGIN-SECTION]}}` and `{{[END-SECTION]}}` - Section template
+- `{{SECTION_ID}}`, `{{SECTION_TITLE}}`, `{{SECTION_CONTENT}}` - Used within section template
+
+### Custom Styling
+
+To use your own stylesheet:
+
+```javascript
+export default {
+  stylesheetPath: "path/to/your/styles.css",
+  // ... other options
+}
+```
+
+You can also use remote stylesheets by providing a URL.
+
+### String Replacements
+
+The `replace` option lets you customize template content without modifying the template itself:
+
+```javascript
+export default {
+  replace: {
+    "/css/style.css": "./src/custom.css",
+    "{{OG_IMAGE}}": "https://example.com/your-image.png"
+  },
+  // ... other options
+}
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
