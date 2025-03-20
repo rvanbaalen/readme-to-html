@@ -43,6 +43,8 @@ For custom stylesheets and section templates, use these special markers:
 {{[END-STYLESHEET]}}
 ```
 
+> **Note:** If your template doesn't include these stylesheet markers, the tool will automatically inject the stylesheet link before the closing `</head>` tag. This ensures that your stylesheets are always included.
+
 #### Section Template
 ```html
 {{[BEGIN-SECTION]}}
@@ -80,11 +82,29 @@ export default {
 | `npm run render` | Convert README using default settings |
 | `node index.js --config=./path/to/config.js` | Use a custom config file |
 | `npm run watch` | Watch mode - auto-rebuild when files change |
+| `npm run cleanup` | Remove all generated files |
 | `npm run dev` | Start Vite dev server for live preview |
 | `node index.js --help` | Show help information |
 | `node index.js --version` | Show version information |
 
-### 4. Deploy to GitHub Pages
+### 4. Cleanup Generated Files
+
+If you need to remove all generated files (e.g., before committing to git or when switching between different templates):
+
+```bash
+# Remove all generated files
+npm run cleanup
+
+# Or using the CLI directly
+node index.js --cleanup
+```
+
+This command will:
+- Remove the generated HTML file (default: `index.html` or the file specified in `outputPath`)
+- Delete the build directory with all its contents
+- Respect custom paths defined in your configuration file
+
+### 5. Deploy to GitHub Pages
 
 Upload your generated `index.html` file and build assets to GitHub Pages.
 
@@ -102,6 +122,7 @@ Upload your generated `index.html` file and build assets to GitHub Pages.
 - **Custom Stylesheets**: Support for local or remote CSS stylesheets
 - **Path Customization**: String replacement to fix paths in remote templates
 - **Live Development**: Watch mode with automatic rebuilds when files change
+- **Easy Cleanup**: Simple command to remove all generated files
 
 ## Customization
 
