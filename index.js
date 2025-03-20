@@ -177,7 +177,7 @@ jobs:
         run: npm ci
 
       - name: Render README.md to HTML
-        run: node ./index.js
+        run: npx @rvanbaalen/readme-to-html
 
       - name: Build HTML to static files
         run: npm run build
