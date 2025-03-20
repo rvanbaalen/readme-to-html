@@ -8,8 +8,10 @@ import { marked } from 'marked';
 import { URL } from 'url';
 import { spawn } from 'child_process';
 
-// Get directory name in ESM
+// Get directory name in ESM for package files
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Get current working directory for user files
+const cwd = process.cwd();
 
 // Read package.json for version information
 const packageJsonPath = path.join(__dirname, 'package.json');
@@ -28,7 +30,7 @@ function showHelp() {
 readme-to-html - Convert README.md to a beautiful HTML page
 
 Usage:
-  node index.js [options]
+  npx @rvanbaalen/readme-to-html [options]
 
 Options:
   --config=<path>, -c=<path>   Specify a custom configuration file
@@ -39,13 +41,16 @@ Options:
   --help, -h                   Show this help information
   --version, -v                Show version information
 
+Note: A configuration file (rtoh.config.js) with a templatePath is required.
+      Run with --init to create one in your current directory.
+
 Examples:
-  node index.js
-  node index.js --config=./custom-config.js
-  node index.js --watch
-  node index.js --cleanup
-  node index.js --init
-  node index.js --install-workflow
+  npx @rvanbaalen/readme-to-html --init
+  npx @rvanbaalen/readme-to-html
+  npx @rvanbaalen/readme-to-html --config=./custom-config.js
+  npx @rvanbaalen/readme-to-html --watch
+  npx @rvanbaalen/readme-to-html --cleanup
+  npx @rvanbaalen/readme-to-html --install-workflow
   
 For more information, visit: ${packageInfo.homepage || 'https://github.com/rvanbaalen/readme-to-html'}
 `);
@@ -233,15 +238,15 @@ async function cleanupFiles() {
   
   const filesToRemove = [
     // Default output HTML file
-    path.join(__dirname, 'index.html'),
+    path.join(cwd, 'index.html'),
     // Build directory with generated assets
-    path.join(__dirname, 'build')
+    path.join(cwd, 'build')
   ];
   
   try {
     // Try to load config to get custom paths if they exist
     let config = null;
-    const configPath = path.join(__dirname, 'rtoh.config.js');
+    const configPath = path.join(cwd, 'rtoh.config.js');
     
     if (existsSync(configPath)) {
       try {
@@ -255,7 +260,7 @@ async function cleanupFiles() {
     
     // Add custom output path if defined in config
     if (config && config.outputPath) {
-      const customOutputPath = resolveFilePath(config.outputPath, __dirname);
+      const customOutputPath = resolveFilePath(config.outputPath, cwd);
       if (!filesToRemove.includes(customOutputPath)) {
         filesToRemove.push(customOutputPath);
       }
@@ -291,15 +296,15 @@ function showVersion() {
   process.exit(0);
 }
 
-// Default configuration
+// Default configuration - note that templatePath must be provided in user config
 const defaultConfig = {
   // Input files
   readmePath: 'README.md',
-  templatePath: 'src/template.html',
+  templatePath: '', // Must be provided in user config
   // Output file
   outputPath: 'index.html',
   // Stylesheet (can be local path or URL)
-  stylesheetPath: '', // Empty means use the default style.css from Vite
+  stylesheetPath: '', // Empty means no custom stylesheet
   // Customization options
   excludeFromNav: ['description', 'contributing', 'license'],
   // Template string replacements (e.g., for stylesheet paths)
@@ -379,8 +384,8 @@ async function loadConfig() {
     configPath = path.resolve(process.cwd(), customConfigPath);
     console.log(`Looking for custom config at: ${configPath}`);
   } else {
-    // Default config path in project root
-    configPath = path.join(__dirname, 'rtoh.config.js');
+    // Default config path in user's current working directory
+    configPath = path.join(process.cwd(), 'rtoh.config.js');
   }
 
   try {
@@ -434,8 +439,10 @@ async function loadConfig() {
         console.error(`Custom config file not found at ${configPath}`);
         process.exit(1);
       } else {
-        console.log('No configuration file found, using defaults');
-        return defaultConfig;
+        console.error('Error: No configuration file found.');
+        console.error('Please create a configuration file with a templatePath property.');
+        console.error('You can create one using the --init command (npx @rvanbaalen/readme-to-html --init)');
+        process.exit(1);
       }
     }
   } catch (error) {
@@ -555,34 +562,39 @@ async function render() {
   // Load configuration
   const config = await loadConfig();
 
-  // Read README.md
-  const readmePath = resolveFilePath(config.readmePath, __dirname);
+  // Read README.md - use current working directory for user content
+  const readmePath = resolveFilePath(config.readmePath, cwd);
   const readmeContent = await fs.readFile(readmePath, 'utf8');
 
   // Get template content from either URL or local file
   let templateContent;
 
+  if (!config.templatePath) {
+    console.error('Error: No template path specified in configuration file.');
+    console.error('Please create a configuration file with a templatePath property.');
+    console.error('You can create one using the --init command.');
+    process.exit(1);
+  }
+
   if (isValidUrl(config.templatePath)) {
     // Fetch template from URL
     templateContent = await fetchFromUrl(config.templatePath);
   } else {
-    // Read from local file system
-    const templateFilePath = resolveFilePath(config.templatePath, __dirname);
+    // Read from local file system - try user's current working directory first
+    const templateFilePath = resolveFilePath(config.templatePath, cwd);
     console.log(`Loading template from: ${templateFilePath}`);
     
-    templateContent = await fs.readFile(templateFilePath, 'utf8')
-      .catch(error => {
-        // Fallback to regular template.html if src/template.html doesn't exist
-        if (error.code === 'ENOENT' && config.templatePath === 'src/template.html') {
-          console.log('Falling back to template.html in root directory');
-          return fs.readFile(path.join(__dirname, 'template.html'), 'utf8');
-        }
-        throw error;
-      });
+    try {
+      templateContent = await fs.readFile(templateFilePath, 'utf8');
+    } catch (error) {
+      console.error(`Error: Could not read template file at ${templateFilePath}`);
+      console.error(error.message);
+      process.exit(1);
+    }
   }
 
-  // Load custom stylesheet if specified
-  const stylesheetContent = await loadStylesheet(config.stylesheetPath, __dirname);
+  // Load custom stylesheet if specified - use current working directory
+  const stylesheetContent = await loadStylesheet(config.stylesheetPath, cwd);
 
   // When a custom stylesheet is loaded, we'll replace the entire stylesheet section
   let stylesheetReplacement = null;
@@ -591,10 +603,10 @@ async function render() {
     // Generate a unique asset filename for Vite to process
     const stylesheetFilename = `style.css`;
     const buildDir = 'build';
-    const stylesheetOutputPath = path.join(__dirname, buildDir, stylesheetFilename);
+    const stylesheetOutputPath = path.join(cwd, buildDir, stylesheetFilename);
 
     // Write the stylesheet content to a file in the build directory so Vite can process it
-    await fs.mkdir(path.join(__dirname, buildDir), { recursive: true });
+    await fs.mkdir(path.join(cwd, buildDir), { recursive: true });
     await fs.writeFile(stylesheetOutputPath, stylesheetContent, 'utf8');
     console.log(`Custom stylesheet written to: ${stylesheetOutputPath}`);
 
@@ -806,8 +818,8 @@ async function render() {
   // Fix code blocks formatting to ensure proper Prism.js highlighting
   renderedHtml = renderedHtml.replace(/<pre><code class="language-([^"]+)">/g, '<pre><code class="language-$1">');
 
-  // Write to the output file specified in the config
-  await fs.writeFile(path.join(__dirname, config.outputPath), renderedHtml, 'utf8');
+  // Write to the output file specified in the config - use current working directory
+  await fs.writeFile(path.join(cwd, config.outputPath), renderedHtml, 'utf8');
   console.log(`Successfully rendered ${config.readmePath} to ${config.outputPath}`);
 }
 
@@ -855,35 +867,30 @@ async function startWatchMode(config) {
 
   // Files to watch
   const filesToWatch = [
-    resolveFilePath(config.readmePath, __dirname),
-    path.join(__dirname, 'package.json')
+    resolveFilePath(config.readmePath, cwd),
+    path.join(cwd, 'package.json')
   ];
 
   // Add template file to watch if it's local (not a URL)
   if (!isValidUrl(config.templatePath)) {
     // Get the absolute path of the template file
-    const templatePath = resolveFilePath(config.templatePath, __dirname);
+    const templatePath = resolveFilePath(config.templatePath, cwd);
     filesToWatch.push(templatePath);
     console.log(`Watching template: ${templatePath}`);
     
-    // Also watch the fallback template.html if using the default path
-    if (config.templatePath === 'src/template.html') {
-      const fallbackPath = path.join(__dirname, 'template.html');
-      filesToWatch.push(fallbackPath);
-      console.log(`Watching fallback template: ${fallbackPath}`);
-    }
+    // No fallback templates used anymore
   }
 
   // Add stylesheet file to watch if it's local (not a URL)
   if (config.stylesheetPath && !isValidUrl(config.stylesheetPath)) {
     // Get the absolute path of the stylesheet file
-    const stylesheetPath = resolveFilePath(config.stylesheetPath, __dirname);
+    const stylesheetPath = resolveFilePath(config.stylesheetPath, cwd);
     filesToWatch.push(stylesheetPath);
     console.log(`Watching stylesheet: ${stylesheetPath}`);
   }
 
   // Add config file to watch if it exists
-  const configPath = path.join(__dirname, 'rtoh.config.js');
+  const configPath = path.join(cwd, 'rtoh.config.js');
   if (existsSync(configPath)) {
     filesToWatch.push(configPath);
   }
