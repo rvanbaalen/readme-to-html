@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.2.0...readme-to-html-v1.2.1) (2025-03-20)
+
+
+### Bug Fixes
+
+* add executable script and define CLI command in package.json ([465c3f2](https://github.com/rvanbaalen/readme-to-html/commit/465c3f24527bc729de04b30667a7da57cd140a8a))
+
 ## [1.2.0](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.1.0...readme-to-html-v1.2.0) (2025-03-20)
 
 
