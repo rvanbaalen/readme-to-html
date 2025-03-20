@@ -46,7 +46,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
-      - name: Build
+      - name: Render README.md to HTML
+        run: node ./index.js
+
+      - name: Build HTML to static files
         run: npm run build
 
       - name: Upload artifact
