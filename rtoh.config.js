@@ -8,7 +8,7 @@ export default {
   // templatePath: "~/Sites/rvanbaalen.github.io/templates/project-template.html",
 
   // Custom stylesheet - using local file
-  stylesheetPath: "https://raw.githubusercontent.com/rvanbaalen/rvanbaalen.github.io/refs/heads/main/css/style.css",
+  stylesheetPath: "https://raw.githubusercontent.com/rvanbaalen/rvanbaalen.github.io/refs/heads/main/templates/style.css",
 
   // Fix paths in the remote template to work locally
   replace: {
