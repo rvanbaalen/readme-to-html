@@ -42,12 +42,14 @@
     "LICENSE",
     "rtoh.config.example.js"
   ],
+  "dependencies": {
+    "marked": "^15.0.7"
+  },
   "devDependencies": {
     "@rvanbaalen/eslint-config": "^1.0.2",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.0.9",
     "eslint": "^9.22.0",
-    "marked": "^15.0.7",
     "tailwindcss": "^4.0.9",
     "vite": "^6.2.0"
   }
