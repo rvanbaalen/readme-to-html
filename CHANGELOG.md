@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.4](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.2.3...readme-to-html-v1.2.4) (2025-03-20)
+
+
+### Bug Fixes
+
+* update package.json path to use current working directory and add error handling ([78fd8d7](https://github.com/rvanbaalen/readme-to-html/commit/78fd8d74e1bd68185452414acfc52dadf3f3d7fb))
+* update README rendering command to use npx for improved execution ([342dd6a](https://github.com/rvanbaalen/readme-to-html/commit/342dd6a985d7c5e7ee6b321f2f83567d2f6176c6))
+
 ## [1.2.3](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.2.2...readme-to-html-v1.2.3) (2025-03-20)
 
 
