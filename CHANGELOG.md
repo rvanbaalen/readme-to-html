@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.2.2...readme-to-html-v1.2.3) (2025-03-20)
+
+
+### Bug Fixes
+
+* update paths to use current working directory for user files and configurations ([d33a53a](https://github.com/rvanbaalen/readme-to-html/commit/d33a53af5dacc641eb1d694b290641ea3b03d6f4))
+
 ## [1.2.2](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.2.1...readme-to-html-v1.2.2) (2025-03-20)
 
 
