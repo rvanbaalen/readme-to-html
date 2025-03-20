@@ -9,11 +9,11 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run render && vite build",
+    "build": "npm run rtoh:render && vite build",
     "preview": "vite preview",
-    "render": "node index.js",
-    "watch": "node index.js --watch",
-    "cleanup": "node index.js --cleanup",
+    "rtoh:render": "node index.js",
+    "rtoh:watch": "node index.js --watch",
+    "rtoh:cleanup": "node index.js --cleanup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
