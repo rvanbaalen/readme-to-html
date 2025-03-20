@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.1.0](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.0.3...readme-to-html-v1.1.0) (2025-03-20)
+
+
+### Features
+
+* add --cleanup option to remove generated files ([188d19a](https://github.com/rvanbaalen/readme-to-html/commit/188d19a3d3aa65fafaf5bea09729956930c41574))
+* add --init option to create a minimal configuration file ([21888f9](https://github.com/rvanbaalen/readme-to-html/commit/21888f9595d8d991040fe6dce85b346da2a8b8a2))
+* update release workflow to render README.md to HTML and build static files ([77bd464](https://github.com/rvanbaalen/readme-to-html/commit/77bd4646d2b1105d68f53a80740588453992274d))
+
+
+### Bug Fixes
+
+* remove index.html from .gitignore and allow tailwind to render the file ([1b1739c](https://github.com/rvanbaalen/readme-to-html/commit/1b1739ca7e76ac3084739ac7046845f1d6bbef3d))
+* remove outdated local CSS path in rtoh.config.js ([049f0e1](https://github.com/rvanbaalen/readme-to-html/commit/049f0e133ee8139163537085416c43bdb2fdf4e6))
+* update stylesheetPath in rtoh.config.js to point to the correct template directory ([d648abf](https://github.com/rvanbaalen/readme-to-html/commit/d648abf2e33204cfbb56f679fb0072893ae1346f))
+
 ## [1.0.3](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.0.2...readme-to-html-v1.0.3) (2025-03-19)
 
 
