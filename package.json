@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "render": "node index.js",
     "watch": "node index.js --watch",
+    "cleanup": "node index.js --cleanup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {

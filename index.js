@@ -31,6 +31,7 @@ Usage:
 Options:
   --config=<path>, -c=<path>   Specify a custom configuration file
   --watch, -w                  Watch mode: automatically rebuild when files change
+  --cleanup                    Remove all generated files
   --help, -h                   Show this help information
   --version, -v                Show version information
 
@@ -38,10 +39,71 @@ Examples:
   node index.js
   node index.js --config=./custom-config.js
   node index.js --watch
+  node index.js --cleanup
   
 For more information, visit: ${packageInfo.homepage || 'https://github.com/rvanbaalen/readme-to-html'}
 `);
   process.exit(0);
+}
+
+/**
+ * Cleanup generated files
+ */
+async function cleanupFiles() {
+  console.log('🧹 Cleaning up generated files...');
+  
+  const filesToRemove = [
+    // Default output HTML file
+    path.join(__dirname, 'index.html'),
+    // Build directory with generated assets
+    path.join(__dirname, 'build')
+  ];
+  
+  try {
+    // Try to load config to get custom paths if they exist
+    let config = null;
+    const configPath = path.join(__dirname, 'rtoh.config.js');
+    
+    if (existsSync(configPath)) {
+      try {
+        const userConfigModule = await import(`file://${configPath}`);
+        config = userConfigModule.default || {};
+        console.log('Found configuration file, checking for custom paths...');
+      } catch (err) {
+        console.log('Could not load config file, using default paths for cleanup.');
+      }
+    }
+    
+    // Add custom output path if defined in config
+    if (config && config.outputPath) {
+      const customOutputPath = resolveFilePath(config.outputPath, __dirname);
+      if (!filesToRemove.includes(customOutputPath)) {
+        filesToRemove.push(customOutputPath);
+      }
+    }
+    
+    // Process each file/directory
+    for (const filePath of filesToRemove) {
+      if (existsSync(filePath)) {
+        const stats = await fs.stat(filePath);
+        
+        if (stats.isDirectory()) {
+          // Remove directory recursively
+          await fs.rm(filePath, { recursive: true, force: true });
+          console.log(`✅ Removed directory: ${filePath}`);
+        } else {
+          // Remove file
+          await fs.unlink(filePath);
+          console.log(`✅ Removed file: ${filePath}`);
+        }
+      }
+    }
+    
+    console.log('🎉 Cleanup complete!');
+  } catch (error) {
+    console.error(`Error during cleanup: ${error.message}`);
+    process.exit(1);
+  }
 }
 
 // Show version information
@@ -99,6 +161,12 @@ async function loadConfig() {
     // Check for watch mode
     if (arg === '--watch' || arg === '-w') {
       global.watchMode = true;
+    }
+    
+    // Check for cleanup mode
+    if (arg === '--cleanup') {
+      await cleanupFiles();
+      process.exit(0);
     }
   }
 
@@ -331,15 +399,17 @@ async function render() {
   if (stylesheetContent) {
     // Generate a unique asset filename for Vite to process
     const stylesheetFilename = `style.css`;
-    const stylesheetOutputPath = path.join(__dirname, 'build', stylesheetFilename);
+    const buildDir = 'build';
+    const stylesheetOutputPath = path.join(__dirname, buildDir, stylesheetFilename);
 
     // Write the stylesheet content to a file in the build directory so Vite can process it
-    await fs.mkdir(path.join(__dirname, 'build'), { recursive: true });
+    await fs.mkdir(path.join(__dirname, buildDir), { recursive: true });
     await fs.writeFile(stylesheetOutputPath, stylesheetContent, 'utf8');
     console.log(`Custom stylesheet written to: ${stylesheetOutputPath}`);
 
-    // Create a link tag referencing the stylesheet
-    stylesheetReplacement = `<link href="/build/${stylesheetFilename}?${Date.now()}" rel="stylesheet">`;
+    // Create a link tag referencing the stylesheet with a relative path
+    // Use ./ instead of / for better compatibility with different deployment scenarios
+    stylesheetReplacement = `<link href="./${buildDir}/${stylesheetFilename}?${Date.now()}" rel="stylesheet">`;
   }
 
   // Apply template string replacements if any are defined
@@ -490,16 +560,36 @@ async function render() {
 
   // Replace stylesheet section in the head with custom stylesheet if provided
   if (stylesheetReplacement) {
+    console.log(`Generated stylesheet link: ${stylesheetReplacement}`);
+    
     // Create a pattern that specifically targets the head section
     // First occurrence only, so no global flag
     const stylesheetPattern = /\{\{\[BEGIN-STYLESHEET\]\}\}[\s\S]*?\{\{\[END-STYLESHEET\]\}\}/;
     
-    renderedHtml = replaceInHeadSection(
-      renderedHtml, 
-      stylesheetPattern, 
-      stylesheetReplacement
-    );
-    console.log('Replaced stylesheet section with custom stylesheet');
+    // Try to replace the stylesheet markers if they exist
+    const hasStylesheetMarkers = stylesheetPattern.test(renderedHtml);
+    console.log(`Template has stylesheet markers: ${hasStylesheetMarkers}`);
+    
+    if (hasStylesheetMarkers) {
+      renderedHtml = replaceInHeadSection(
+        renderedHtml, 
+        stylesheetPattern, 
+        stylesheetReplacement
+      );
+      console.log('Replaced stylesheet section markers with custom stylesheet');
+    } else {
+      // If markers don't exist, directly insert before </head>
+      const headEndIndex = renderedHtml.indexOf('</head>');
+      if (headEndIndex !== -1) {
+        renderedHtml = 
+          renderedHtml.substring(0, headEndIndex) + 
+          `\n    ${stylesheetReplacement}\n` + 
+          renderedHtml.substring(headEndIndex);
+        console.log('Directly injected stylesheet link before </head> tag');
+      } else {
+        console.warn('Could not find </head> tag in template to inject stylesheet');
+      }
+    }
   }
   
   // Find main content area to replace section template
