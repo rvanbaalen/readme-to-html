@@ -632,10 +632,19 @@ async function render() {
   // Parse README.md to HTML
   const readmeHtml = marked(readmeContent);
 
-  // Get package information
-  const packageJsonPath = path.join(__dirname, 'package.json');
-  const packageJsonContent = await fs.readFile(packageJsonPath, 'utf8');
-  const packageJson = JSON.parse(packageJsonContent);
+  // Get package information from user's current working directory
+  const packageJsonPath = path.join(cwd, 'package.json');
+  let packageJsonContent;
+  let packageJson;
+  
+  try {
+    packageJsonContent = await fs.readFile(packageJsonPath, 'utf8');
+    packageJson = JSON.parse(packageJsonContent);
+  } catch (error) {
+    console.error(`Error: Could not read package.json at ${packageJsonPath}`);
+    console.error(error.message);
+    process.exit(1);
+  }
 
   // Validate required package.json fields
   if (!packageJson.name) {
@@ -868,7 +877,7 @@ async function startWatchMode(config) {
   // Files to watch
   const filesToWatch = [
     resolveFilePath(config.readmePath, cwd),
-    path.join(cwd, 'package.json')
+    path.join(cwd, 'package.json') // User's package.json
   ];
 
   // Add template file to watch if it's local (not a URL)
