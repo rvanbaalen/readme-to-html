@@ -32,6 +32,7 @@ Options:
   --config=<path>, -c=<path>   Specify a custom configuration file
   --watch, -w                  Watch mode: automatically rebuild when files change
   --cleanup                    Remove all generated files
+  --init                       Create a minimal configuration file (rtoh.config.js)
   --help, -h                   Show this help information
   --version, -v                Show version information
 
@@ -40,10 +41,83 @@ Examples:
   node index.js --config=./custom-config.js
   node index.js --watch
   node index.js --cleanup
+  node index.js --init
   
 For more information, visit: ${packageInfo.homepage || 'https://github.com/rvanbaalen/readme-to-html'}
 `);
   process.exit(0);
+}
+
+/**
+ * Create initial config file
+ */
+async function createInitialConfig() {
+  console.log('🛠️  Creating minimal configuration file...');
+  
+  const configPath = path.join(process.cwd(), 'rtoh.config.js');
+  
+  // Check if the file already exists
+  if (existsSync(configPath)) {
+    console.warn(`⚠️  Configuration file already exists at ${configPath}`);
+    const overwrite = await promptForOverwrite();
+    
+    if (!overwrite) {
+      console.log('❌ Operation cancelled. Existing configuration file was not modified.');
+      return;
+    }
+  }
+  
+  // Define minimal configuration template
+  const configTemplate = `/**
+ * Configuration file for readme-to-html
+ * Generated with the --init command
+ */
+export default {
+  // Use a remote template (no need to create your own)
+  templatePath: "https://raw.githubusercontent.com/rvanbaalen/rvanbaalen.github.io/refs/heads/main/templates/project-template.html",
+  
+  // Custom stylesheet (optional)
+  stylesheetPath: "https://raw.githubusercontent.com/rvanbaalen/rvanbaalen.github.io/refs/heads/main/templates/style.css",
+  
+  // Uncomment and customize any additional options as needed:
+  // outputPath: "index.html",
+  // readmePath: "README.md",
+  // excludeFromNav: ["description", "contributing", "license"],
+  // replace: {
+  //   "/css/style.css": "./src/custom.css"
+  // }
+}
+`;
+
+  try {
+    // Write the configuration file
+    await fs.writeFile(configPath, configTemplate, 'utf8');
+    console.log(`✅ Configuration file created at: ${configPath}`);
+    console.log('\nNext steps:');
+    console.log('1. Customize the configuration file if needed');
+    console.log('2. Run `npx @rvanbaalen/readme-to-html` to generate your HTML');
+  } catch (error) {
+    console.error(`Error creating configuration file: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+/**
+ * Prompt for overwriting existing configuration
+ * @returns {Promise<boolean>} True if user confirms overwrite
+ */
+async function promptForOverwrite() {
+  // We can't use built-in readline in ESM, so using a simple approach
+  console.log('Do you want to overwrite the existing configuration file? (y/N):');
+  
+  return new Promise(resolve => {
+    process.stdin.resume();
+    process.stdin.once('data', data => {
+      const input = data.toString().trim().toLowerCase();
+      process.stdin.pause();
+      resolve(input === 'y' || input === 'yes');
+    });
+  });
 }
 
 /**
@@ -166,6 +240,12 @@ async function loadConfig() {
     // Check for cleanup mode
     if (arg === '--cleanup') {
       await cleanupFiles();
+      process.exit(0);
+    }
+    
+    // Check for init mode
+    if (arg === '--init') {
+      await createInitialConfig();
       process.exit(0);
     }
   }
