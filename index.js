@@ -102,6 +102,37 @@ export default {
     // Write the configuration file
     await fs.writeFile(configPath, configTemplate, 'utf8');
     console.log(`✅ Configuration file created at: ${configPath}`);
+    
+    // Install dependencies
+    console.log('\n📦 Installing required dependencies...');
+    try {
+      const child = spawn('npm', ['install', '--save-dev', 'vite', '@tailwindcss/vite'], {
+        cwd: process.cwd(),
+        stdio: 'inherit'
+      });
+      
+      await new Promise((resolve, reject) => {
+        child.on('close', code => {
+          if (code === 0) {
+            console.log('✅ Dependencies installed successfully');
+            resolve();
+          } else {
+            console.error(`❌ Error installing dependencies (exit code: ${code})`);
+            reject(new Error(`npm install exited with code ${code}`));
+          }
+        });
+        
+        child.on('error', err => {
+          console.error(`❌ Error installing dependencies: ${err.message}`);
+          reject(err);
+        });
+      });
+    } catch (error) {
+      console.error(`Error installing dependencies: ${error.message}`);
+      console.log('⚠️ You will need to manually install the required dependencies:');
+      console.log('npm install --save-dev vite @tailwindcss/vite');
+    }
+    
     console.log('\nNext steps:');
     console.log('1. Customize the configuration file if needed');
     console.log('2. Run `npx @rvanbaalen/readme-to-html` to generate your HTML');
