@@ -27,7 +27,12 @@
     "url": "git+ssh://github.com/rvanbaalen/readme-to-html.git"
   },
   "keywords": [
-    "javascript"
+    "javascript",
+    "markdown",
+    "readme",
+    "documentation",
+    "static-site",
+    "github-pages"
   ],
   "author": "Robin van Baalen",
   "license": "MIT",
