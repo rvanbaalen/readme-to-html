@@ -532,6 +532,15 @@ function resolveFilePath(filePath, baseDir) {
   return path.join(baseDir, filePath);
 }
 
+async function to(promise) {
+  try {
+    const result = await promise;
+    return [null, result];
+  } catch (error) {
+    return [error];
+  }
+}
+
 /**
  * Fetch content from a URL
  * @param {string} url - The URL to fetch
@@ -539,19 +548,19 @@ function resolveFilePath(filePath, baseDir) {
  * @returns {Promise<string>} - The content as text
  */
 async function fetchFromUrl(url, contentType = 'template') {
-  try {
     console.log(`Fetching ${contentType} from URL: ${url}`);
-    const response = await fetch(url);
+    // Use to() around the fetch call to handle errors
+    const [error, response] = await to(fetch(url));
+    if (error) {
+      console.error(`Error fetching ${contentType} from URL: ${error.message}`);
+      throw error;
+    }
 
     if (!response.ok) {
       throw new Error(`Failed to fetch ${contentType}: ${response.status} ${response.statusText}`);
     }
 
     return await response.text();
-  } catch (error) {
-    console.error(`Error fetching from URL: ${error.message}`);
-    throw error;
-  }
 }
 
 /**
@@ -787,7 +796,7 @@ async function render() {
     `${orgName}/${repoName}`;
 
   // Get the full GitHub repo URL (for the GITHUB_REPO_LINK template variable)
-  let githubRepoLink = '';
+  let githubRepoLink;
   if (packageJson.repository?.url) {
     // Handle different URL formats (git+https://, git://, etc.)
     githubRepoLink = packageJson.repository.url
