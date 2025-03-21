@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.3.0...readme-to-html-v1.3.1) (2025-03-21)
+
+
+### Bug Fixes
+
+* enhance package name extraction logic for better org/repo handling ([b1c7fc4](https://github.com/rvanbaalen/readme-to-html/commit/b1c7fc4ca5261df4c0d33aaaf9b3b0c388537ed7))
+
 ## [1.3.0](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.2.4...readme-to-html-v1.3.0) (2025-03-21)
 
 
