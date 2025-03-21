@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.2.4...readme-to-html-v1.3.0) (2025-03-21)
+
+
+### Features
+
+* add automatic dependency installation for vite and tailwindcss in setup process ([9910abf](https://github.com/rvanbaalen/readme-to-html/commit/9910abfd299d2f6780c2ab87776cf2ed20f2f53b))
+* add automatic installation of TailwindCSS plugins detected in stylesheet ([34fa196](https://github.com/rvanbaalen/readme-to-html/commit/34fa196cf782e8d56fd1f729b26d39cd4010a130))
+
+
+### Bug Fixes
+
+* clean up whitespace and improve code readability in index.js ([90d6aa6](https://github.com/rvanbaalen/readme-to-html/commit/90d6aa6ad4a51a75e02fde8f2b60cc844cb10cc8))
+
 ## [1.2.4](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.2.3...readme-to-html-v1.2.4) (2025-03-20)
 
 
