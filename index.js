@@ -62,20 +62,20 @@ For more information, visit: ${packageInfo.homepage || 'https://github.com/rvanb
  */
 async function createInitialConfig() {
   console.log('🛠️  Creating minimal configuration file...');
-  
+
   const configPath = path.join(process.cwd(), 'rtoh.config.js');
-  
+
   // Check if the file already exists
   if (existsSync(configPath)) {
     console.warn(`⚠️  Configuration file already exists at ${configPath}`);
     const overwrite = await promptForOverwrite();
-    
+
     if (!overwrite) {
       console.log('❌ Operation cancelled. Existing configuration file was not modified.');
       return;
     }
   }
-  
+
   // Define minimal configuration template
   const configTemplate = `/**
  * Configuration file for readme-to-html
@@ -102,7 +102,7 @@ export default {
     // Write the configuration file
     await fs.writeFile(configPath, configTemplate, 'utf8');
     console.log(`✅ Configuration file created at: ${configPath}`);
-    
+
     // Install dependencies
     console.log('\n📦 Installing required dependencies...');
     try {
@@ -110,7 +110,7 @@ export default {
         cwd: process.cwd(),
         stdio: 'inherit'
       });
-      
+
       await new Promise((resolve, reject) => {
         child.on('close', code => {
           if (code === 0) {
@@ -121,7 +121,7 @@ export default {
             reject(new Error(`npm install exited with code ${code}`));
           }
         });
-        
+
         child.on('error', err => {
           console.error(`❌ Error installing dependencies: ${err.message}`);
           reject(err);
@@ -132,7 +132,7 @@ export default {
       console.log('⚠️ You will need to manually install the required dependencies:');
       console.log('npm install --save-dev vite @tailwindcss/vite');
     }
-    
+
     console.log('\nNext steps:');
     console.log('1. Customize the configuration file if needed');
     console.log('2. Run `npx @rvanbaalen/readme-to-html` to generate your HTML');
@@ -147,26 +147,26 @@ export default {
  */
 async function installWorkflow() {
   console.log('🛠️  Installing GitHub Actions workflow for manual deployments...');
-  
+
   // Create .github/workflows directory if it doesn't exist
   const workflowsDir = path.join(process.cwd(), '.github', 'workflows');
   const workflowPath = path.join(workflowsDir, 'manual-build-deploy.yml');
-  
+
   try {
     // Create the directories if they don't exist
     await fs.mkdir(workflowsDir, { recursive: true });
-    
+
     // Check if the workflow file already exists
     if (existsSync(workflowPath)) {
       console.warn(`⚠️  Workflow file already exists at ${workflowPath}`);
       const overwrite = await promptForOverwrite();
-      
+
       if (!overwrite) {
         console.log('❌ Operation cancelled. Existing workflow file was not modified.');
         return;
       }
     }
-    
+
     // Define workflow file content
     const workflowContent = `name: Manual Build & Deploy
 
@@ -230,7 +230,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 `;
-    
+
     // Write the workflow file
     await fs.writeFile(workflowPath, workflowContent, 'utf8');
     console.log(`✅ GitHub Actions workflow created at: ${workflowPath}`);
@@ -250,7 +250,7 @@ jobs:
 async function promptForOverwrite() {
   // We can't use built-in readline in ESM, so using a simple approach
   console.log('Do you want to overwrite the existing configuration file? (y/N):');
-  
+
   return new Promise(resolve => {
     process.stdin.resume();
     process.stdin.once('data', data => {
@@ -266,19 +266,19 @@ async function promptForOverwrite() {
  */
 async function cleanupFiles() {
   console.log('🧹 Cleaning up generated files...');
-  
+
   const filesToRemove = [
     // Default output HTML file
     path.join(cwd, 'index.html'),
     // Build directory with generated assets
     path.join(cwd, 'build')
   ];
-  
+
   try {
     // Try to load config to get custom paths if they exist
     let config = null;
     const configPath = path.join(cwd, 'rtoh.config.js');
-    
+
     if (existsSync(configPath)) {
       try {
         const userConfigModule = await import(`file://${configPath}`);
@@ -288,7 +288,7 @@ async function cleanupFiles() {
         console.log('Could not load config file, using default paths for cleanup.');
       }
     }
-    
+
     // Add custom output path if defined in config
     if (config && config.outputPath) {
       const customOutputPath = resolveFilePath(config.outputPath, cwd);
@@ -296,12 +296,12 @@ async function cleanupFiles() {
         filesToRemove.push(customOutputPath);
       }
     }
-    
+
     // Process each file/directory
     for (const filePath of filesToRemove) {
       if (existsSync(filePath)) {
         const stats = await fs.stat(filePath);
-        
+
         if (stats.isDirectory()) {
           // Remove directory recursively
           await fs.rm(filePath, { recursive: true, force: true });
@@ -313,7 +313,7 @@ async function cleanupFiles() {
         }
       }
     }
-    
+
     console.log('🎉 Cleanup complete!');
   } catch (error) {
     console.error(`Error during cleanup: ${error.message}`);
@@ -377,19 +377,19 @@ async function loadConfig() {
     if (arg === '--watch' || arg === '-w') {
       global.watchMode = true;
     }
-    
+
     // Check for cleanup mode
     if (arg === '--cleanup') {
       await cleanupFiles();
       process.exit(0);
     }
-    
+
     // Check for init mode
     if (arg === '--init') {
       await createInitialConfig();
       process.exit(0);
     }
-    
+
     // Check for install-workflow mode
     if (arg === '--install-workflow') {
       await installWorkflow();
@@ -522,12 +522,12 @@ function resolveFilePath(filePath, baseDir) {
     const homedir = process.env.HOME || process.env.USERPROFILE;
     filePath = path.join(homedir, filePath.slice(1));
   }
-  
+
   // Check if the path is absolute
   if (path.isAbsolute(filePath)) {
     return filePath;
   }
-  
+
   // It's a relative path, join with the base directory
   return path.join(baseDir, filePath);
 }
@@ -564,15 +564,15 @@ async function installTailwindPlugins(stylesheetContent) {
   const pluginRegex = /@plugin\s+["']([^"']+)["']/g;
   const plugins = [];
   let match;
-  
+
   while ((match = pluginRegex.exec(stylesheetContent)) !== null) {
     plugins.push(match[1]);
   }
-  
+
   if (plugins.length === 0) {
     return;
   }
-  
+
   // Read package.json to check existing dependencies
   let packageJson;
   try {
@@ -583,23 +583,23 @@ async function installTailwindPlugins(stylesheetContent) {
     console.warn(`Warning: Could not read package.json: ${error.message}`);
     return;
   }
-  
+
   const devDependencies = packageJson.devDependencies || {};
   const pluginsToInstall = plugins.filter(plugin => !devDependencies[plugin]);
-  
+
   if (pluginsToInstall.length === 0) {
     console.log('All required TailwindCSS plugins are already installed.');
     return;
   }
-  
+
   console.log(`📦 Installing TailwindCSS plugins found in stylesheet: ${pluginsToInstall.join(', ')}`);
-  
+
   try {
     const child = spawn('npm', ['install', '--save-dev', ...pluginsToInstall], {
       cwd: process.cwd(),
       stdio: 'inherit'
     });
-    
+
     await new Promise((resolve, reject) => {
       child.on('close', code => {
         if (code === 0) {
@@ -610,7 +610,7 @@ async function installTailwindPlugins(stylesheetContent) {
           reject(new Error(`npm install exited with code ${code}`));
         }
       });
-      
+
       child.on('error', err => {
         console.error(`❌ Error installing TailwindCSS plugins: ${err.message}`);
         reject(err);
@@ -637,7 +637,7 @@ async function loadStylesheet(stylesheetPath, __dirname) {
 
   try {
     let stylesheetContent;
-    
+
     if (isValidUrl(stylesheetPath)) {
       // Fetch stylesheet from URL
       stylesheetContent = await fetchFromUrl(stylesheetPath, 'stylesheet');
@@ -653,12 +653,12 @@ async function loadStylesheet(stylesheetPath, __dirname) {
           return null;
         });
     }
-    
+
     // Check for TailwindCSS plugins in the stylesheet and install them if needed
     if (stylesheetContent) {
       await installTailwindPlugins(stylesheetContent);
     }
-    
+
     return stylesheetContent;
   } catch (error) {
     console.warn(`Warning: Error loading stylesheet: ${error.message}`);
@@ -692,7 +692,7 @@ async function render() {
     // Read from local file system - try user's current working directory first
     const templateFilePath = resolveFilePath(config.templatePath, cwd);
     console.log(`Loading template from: ${templateFilePath}`);
-    
+
     try {
       templateContent = await fs.readFile(templateFilePath, 'utf8');
     } catch (error) {
@@ -745,7 +745,7 @@ async function render() {
   const packageJsonPath = path.join(cwd, 'package.json');
   let packageJsonContent;
   let packageJson;
-  
+
   try {
     packageJsonContent = await fs.readFile(packageJsonPath, 'utf8');
     packageJson = JSON.parse(packageJsonContent);
@@ -861,20 +861,20 @@ async function render() {
     .replace(/{{GITHUB_REPO_LINK}}/g, githubRepoLink)
     .replace('{{NAVIGATION_LINKS}}', navigationLinks)
     .replace('{{BADGES_SECTION}}', badgesSection);
-    
+
   // Create a function to safely replace only in the head section, not in code examples
   function replaceInHeadSection(html, pattern, replacement) {
     // Find the head closing tag
     const headEndIndex = html.indexOf('</head>');
     if (headEndIndex === -1) return html; // If we can't find the head, return unchanged
-    
+
     // Split the document into head and body
     const headSection = html.substring(0, headEndIndex);
     const restOfDocument = html.substring(headEndIndex);
-    
+
     // Replace only in the head section - do a single replace instead of global
     const modifiedHead = headSection.replace(pattern, replacement);
-    
+
     // Recombine the document
     return modifiedHead + restOfDocument;
   }
@@ -882,19 +882,19 @@ async function render() {
   // Replace stylesheet section in the head with custom stylesheet if provided
   if (stylesheetReplacement) {
     console.log(`Generated stylesheet link: ${stylesheetReplacement}`);
-    
+
     // Create a pattern that specifically targets the head section
     // First occurrence only, so no global flag
-    const stylesheetPattern = /\{\{\[BEGIN-STYLESHEET\]\}\}[\s\S]*?\{\{\[END-STYLESHEET\]\}\}/;
-    
+    const stylesheetPattern = /{{\[BEGIN-STYLESHEET]}}[\s\S]*?{{\[END-STYLESHEET]}}/;
+
     // Try to replace the stylesheet markers if they exist
     const hasStylesheetMarkers = stylesheetPattern.test(renderedHtml);
     console.log(`Template has stylesheet markers: ${hasStylesheetMarkers}`);
-    
+
     if (hasStylesheetMarkers) {
       renderedHtml = replaceInHeadSection(
-        renderedHtml, 
-        stylesheetPattern, 
+        renderedHtml,
+        stylesheetPattern,
         stylesheetReplacement
       );
       console.log('Replaced stylesheet section markers with custom stylesheet');
@@ -902,9 +902,9 @@ async function render() {
       // If markers don't exist, directly insert before </head>
       const headEndIndex = renderedHtml.indexOf('</head>');
       if (headEndIndex !== -1) {
-        renderedHtml = 
-          renderedHtml.substring(0, headEndIndex) + 
-          `\n    ${stylesheetReplacement}\n` + 
+        renderedHtml =
+          renderedHtml.substring(0, headEndIndex) +
+          `\n    ${stylesheetReplacement}\n` +
           renderedHtml.substring(headEndIndex);
         console.log('Directly injected stylesheet link before </head> tag');
       } else {
@@ -912,23 +912,23 @@ async function render() {
       }
     }
   }
-  
+
   // Find main content area to replace section template
   const mainOpenTagIndex = renderedHtml.indexOf('<main');
   const mainCloseTagIndex = renderedHtml.lastIndexOf('</main>');
-  
+
   if (mainOpenTagIndex !== -1 && mainCloseTagIndex !== -1) {
     // Split the document
     const beforeMain = renderedHtml.substring(0, mainOpenTagIndex);
     const mainSection = renderedHtml.substring(mainOpenTagIndex, mainCloseTagIndex);
     const afterMain = renderedHtml.substring(mainCloseTagIndex);
-    
+
     // Replace only in the main section
     const modifiedMain = mainSection.replace(
-      /\{\{\[BEGIN-SECTION\]\}\}[\s\S]*?\{\{\[END-SECTION\]\}\}/, 
+      /\{\{\[BEGIN-SECTION\]\}\}[\s\S]*?\{\{\[END-SECTION\]\}\}/,
       sectionsHtml
     );
-    
+
     // Recombine the document
     renderedHtml = beforeMain + modifiedMain + afterMain;
   }
@@ -995,7 +995,7 @@ async function startWatchMode(config) {
     const templatePath = resolveFilePath(config.templatePath, cwd);
     filesToWatch.push(templatePath);
     console.log(`Watching template: ${templatePath}`);
-    
+
     // No fallback templates used anymore
   }
 
@@ -1079,6 +1079,6 @@ render().catch(error => {
   if (global.watchMode) {
     // Get configuration again to pass to watch mode
     const config = await loadConfig();
-    startWatchMode(config);
+    await startWatchMode(config);
   }
 });
