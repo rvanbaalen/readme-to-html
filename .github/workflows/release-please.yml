@@ -49,7 +49,7 @@ jobs:
       - name: Render README.md to HTML
         run: node ./index.js
 
-      - name: Build HTML to static files
+      - name: Prepare rendered HTML for deployment with Vite
         run: npm run build
 
       - name: Upload artifact
