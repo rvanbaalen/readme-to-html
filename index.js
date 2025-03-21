@@ -781,19 +781,42 @@ async function render() {
 
   // Get package name for badges - strip @ prefix if present
   const packageNameForBadges = packageJson.name.replace(/^@/, '');
-  const [orgName, repoName] = packageNameForBadges.split('/');
-
-  if (!orgName || !repoName) {
-    console.error('Error: package.json name must be in format "orgName/repoName" or "@orgName/repoName".');
-    process.exit(1);
+  
+  // Check if the package name contains a slash (org/repo format)
+  const nameParts = packageNameForBadges.split('/');
+  let orgName, repoName;
+  
+  if (nameParts.length === 2) {
+    // Standard org/repo format
+    [orgName, repoName] = nameParts;
+  } else {
+    // For non-prefixed packages, try to extract org/repo from repository URL
+    if (packageJson.repository?.url) {
+      const repoMatch = packageJson.repository.url.match(/github\.com\/([^/.]+)\/([^/.]+)(?:\.git)?$/);
+      if (repoMatch && repoMatch.length >= 3) {
+        orgName = repoMatch[1];
+        repoName = repoMatch[2];
+        console.log(`Extracted org "${orgName}" and repo "${repoName}" from repository URL`);
+      } else {
+        // Fallback: use the name as both org and repo
+        orgName = packageNameForBadges;
+        repoName = packageNameForBadges;
+        console.log(`Using package name "${packageNameForBadges}" as both org and repo name`);
+      }
+    } else {
+      // No repository URL, use the name as both org and repo
+      orgName = packageNameForBadges;
+      repoName = packageNameForBadges;
+      console.log(`Using package name "${packageNameForBadges}" as both org and repo name`);
+    }
   }
 
   // Encode package name for URL
   const encodedPackageName = encodeURIComponent(packageJson.name);
 
   // Extract repository URL path and full GitHub URL from package.json if available
-  const repoPath = packageJson.repository?.url?.match(/github\.com\/([^/.]+\/[^/.]+)(?:\.git)?$/)?.[1] ||
-    `${orgName}/${repoName}`;
+  // Now we can simply use the already-extracted orgName and repoName
+  const repoPath = `${orgName}/${repoName}`;
 
   // Get the full GitHub repo URL (for the GITHUB_REPO_LINK template variable)
   let githubRepoLink;
