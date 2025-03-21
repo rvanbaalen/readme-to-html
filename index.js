@@ -839,7 +839,7 @@ async function render() {
     .join('\n                        ');
 
   // Extract section template
-  const sectionMatch = templateContent.match(/\{\{\[BEGIN-SECTION\]\}\}([\s\S]*?)\{\{\[END-SECTION\]\}\}/);
+  const sectionMatch = templateContent.match(/\{\{\[BEGIN-SECTION]}}([\s\S]*?)\{\{\[END-SECTION]}}/);
   if (!sectionMatch) {
     console.error('Error: Could not find section template markers in template.html');
     process.exit(1);
@@ -934,7 +934,7 @@ async function render() {
 
     // Replace only in the main section
     const modifiedMain = mainSection.replace(
-      /\{\{\[BEGIN-SECTION\]\}\}[\s\S]*?\{\{\[END-SECTION\]\}\}/,
+      /\{\{\[BEGIN-SECTION]}}[\s\S]*?\{\{\[END-SECTION]}}/,
       sectionsHtml
     );
 
