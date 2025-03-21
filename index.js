@@ -555,6 +555,75 @@ async function fetchFromUrl(url, contentType = 'template') {
 }
 
 /**
+ * Install TailwindCSS plugins detected in stylesheet
+ * @param {string} stylesheetContent - Content of the stylesheet
+ * @returns {Promise<void>}
+ */
+async function installTailwindPlugins(stylesheetContent) {
+  // Find all @plugin directives in the stylesheet
+  const pluginRegex = /@plugin\s+["']([^"']+)["']/g;
+  const plugins = [];
+  let match;
+  
+  while ((match = pluginRegex.exec(stylesheetContent)) !== null) {
+    plugins.push(match[1]);
+  }
+  
+  if (plugins.length === 0) {
+    return;
+  }
+  
+  // Read package.json to check existing dependencies
+  let packageJson;
+  try {
+    const packageJsonPath = path.join(cwd, 'package.json');
+    const packageJsonContent = await fs.readFile(packageJsonPath, 'utf8');
+    packageJson = JSON.parse(packageJsonContent);
+  } catch (error) {
+    console.warn(`Warning: Could not read package.json: ${error.message}`);
+    return;
+  }
+  
+  const devDependencies = packageJson.devDependencies || {};
+  const pluginsToInstall = plugins.filter(plugin => !devDependencies[plugin]);
+  
+  if (pluginsToInstall.length === 0) {
+    console.log('All required TailwindCSS plugins are already installed.');
+    return;
+  }
+  
+  console.log(`📦 Installing TailwindCSS plugins found in stylesheet: ${pluginsToInstall.join(', ')}`);
+  
+  try {
+    const child = spawn('npm', ['install', '--save-dev', ...pluginsToInstall], {
+      cwd: process.cwd(),
+      stdio: 'inherit'
+    });
+    
+    await new Promise((resolve, reject) => {
+      child.on('close', code => {
+        if (code === 0) {
+          console.log('✅ TailwindCSS plugins installed successfully');
+          resolve();
+        } else {
+          console.error(`❌ Error installing TailwindCSS plugins (exit code: ${code})`);
+          reject(new Error(`npm install exited with code ${code}`));
+        }
+      });
+      
+      child.on('error', err => {
+        console.error(`❌ Error installing TailwindCSS plugins: ${err.message}`);
+        reject(err);
+      });
+    });
+  } catch (error) {
+    console.error(`Error installing TailwindCSS plugins: ${error.message}`);
+    console.log('⚠️ You will need to manually install the following plugins:');
+    console.log(`npm install --save-dev ${pluginsToInstall.join(' ')}`);
+  }
+}
+
+/**
  * Load stylesheet content from path or URL
  * @param {string} stylesheetPath - Path or URL to the stylesheet
  * @param {string} __dirname - Current directory path
@@ -567,21 +636,30 @@ async function loadStylesheet(stylesheetPath, __dirname) {
   }
 
   try {
+    let stylesheetContent;
+    
     if (isValidUrl(stylesheetPath)) {
       // Fetch stylesheet from URL
-      return await fetchFromUrl(stylesheetPath, 'stylesheet');
+      stylesheetContent = await fetchFromUrl(stylesheetPath, 'stylesheet');
     } else {
       // Read from local file system
       const stylesheetFilePath = resolveFilePath(stylesheetPath, __dirname);
       console.log(`Loading stylesheet from: ${stylesheetFilePath}`);
 
-      return await fs.readFile(stylesheetFilePath, 'utf8')
+      stylesheetContent = await fs.readFile(stylesheetFilePath, 'utf8')
         .catch(error => {
           console.warn(`Warning: Could not read stylesheet at ${stylesheetFilePath}: ${error.message}`);
           console.log('Falling back to default styling');
           return null;
         });
     }
+    
+    // Check for TailwindCSS plugins in the stylesheet and install them if needed
+    if (stylesheetContent) {
+      await installTailwindPlugins(stylesheetContent);
+    }
+    
+    return stylesheetContent;
   } catch (error) {
     console.warn(`Warning: Error loading stylesheet: ${error.message}`);
     console.log('Falling back to default styling');
