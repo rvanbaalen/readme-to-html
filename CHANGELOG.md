@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.3](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.3.2...readme-to-html-v1.3.3) (2026-03-29)
+
+
+### Bug Fixes
+
+* slugify section IDs to replace spaces with hyphens ([2567a1d](https://github.com/rvanbaalen/readme-to-html/commit/2567a1de6dc77bf2cf9453d84ae66209c42ab249))
+
 ## [1.3.2](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.3.1...readme-to-html-v1.3.2) (2026-03-29)
 
 
