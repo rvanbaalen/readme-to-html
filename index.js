@@ -858,7 +858,7 @@ async function render() {
   // Create navigation links based on sections using excludeFromNav from config
   const navigationLinks = Object.keys(sections)
     .filter(section => !config.excludeFromNav.includes(section.toLowerCase()))
-    .map(section => `<li><a href="#${section.toLowerCase()}" class="hover:text-white/80 transition">${section}</a></li>`)
+    .map(section => `<li><a href="#${section.toLowerCase().replace(/\s+/g, '-')}" class="hover:text-white/80 transition">${section}</a></li>`)
     .join('\n                        ');
 
   // Extract section template
@@ -874,7 +874,7 @@ async function render() {
   // Create HTML sections by applying the template to each section
   const sectionsHtml = Object.entries(sections)
     .map(([title, content]) => {
-      const sectionId = title.toLowerCase() === 'description' ? '' : ` id="${title.toLowerCase()}"`;
+      const sectionId = title.toLowerCase() === 'description' ? '' : ` id="${title.toLowerCase().replace(/\s+/g, '-')}"`;
       return sectionTemplate
         .replace('{{SECTION_ID}}', sectionId)
         .replace('{{SECTION_TITLE}}', title)
