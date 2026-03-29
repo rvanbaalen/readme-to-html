@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.3.1...readme-to-html-v1.3.2) (2026-03-29)
+
+
+### Bug Fixes
+
+* update base path for custom domain ([3471868](https://github.com/rvanbaalen/readme-to-html/commit/34718684f541fd3a0db8747ff014242b2bcdff42))
+
 ## [1.3.1](https://github.com/rvanbaalen/readme-to-html/compare/readme-to-html-v1.3.0...readme-to-html-v1.3.1) (2025-03-21)
 
 
